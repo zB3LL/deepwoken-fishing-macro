@@ -217,8 +217,8 @@ DetectarEReagir() {
         }
         
         ; ZONA A (Esquerda)
-        PixelSearch(&x, &y, POSICOES.A_zona.x1, POSICOES.A_zona.y1, POSICOES.A_zona.x2, POSICOES.A_zona.y2, 0xFFFFFF, 90)
-        if (ErrorLevel = 0) {
+        resultado := PixelSearch(&x, &y, POSICOES.A_zona.x1, POSICOES.A_zona.y1, POSICOES.A_zona.x2, POSICOES.A_zona.y2, 0xFFFFFF, 90)
+        if (resultado = 0) {
             failsafe := CONFIG.failsafe_ciclos
             LibertarTodasAsTeclas()
             send("{a down}")
@@ -227,8 +227,8 @@ DetectarEReagir() {
         }
         
         ; ZONA S (Centro)
-        PixelSearch(&x, &y, POSICOES.S_zona.x1, POSICOES.S_zona.y1, POSICOES.S_zona.x2, POSICOES.S_zona.y2, 0xFFFFFF, 90)
-        if (ErrorLevel = 0) {
+        resultado := PixelSearch(&x, &y, POSICOES.S_zona.x1, POSICOES.S_zona.y1, POSICOES.S_zona.x2, POSICOES.S_zona.y2, 0xFFFFFF, 90)
+        if (resultado = 0) {
             failsafe := CONFIG.failsafe_ciclos
             LibertarTodasAsTeclas()
             send("{s down}")
@@ -237,8 +237,8 @@ DetectarEReagir() {
         }
         
         ; ZONA D (Direita)
-        PixelSearch(&x, &y, POSICOES.D_zona.x1, POSICOES.D_zona.y1, POSICOES.D_zona.x2, POSICOES.D_zona.y2, 0xFFFFFF, 90)
-        if (ErrorLevel = 0) {
+        resultado := PixelSearch(&x, &y, POSICOES.D_zona.x1, POSICOES.D_zona.y1, POSICOES.D_zona.x2, POSICOES.D_zona.y2, 0xFFFFFF, 90)
+        if (resultado = 0) {
             failsafe := CONFIG.failsafe_ciclos
             LibertarTodasAsTeclas()
             send("{d down}")
