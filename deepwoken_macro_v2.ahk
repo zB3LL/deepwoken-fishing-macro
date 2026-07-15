@@ -39,27 +39,33 @@ k:: MostrarCoordenadas()
 CarregarConfiguracao() {
     global CONFIG, POSICOES
     
+    ; Função auxiliar criada para ignorar os comentários (;) e espaços vazios
+    LerIni(secao, chave, padrao) {
+        valor := IniRead("config.ini", secao, chave, padrao)
+        return Trim(StrSplit(valor, ";")[1]) ; Corta no ";" e limpa os espaços
+    }
+    
     ; Teclas
-    CONFIG.vara_tecla := IniRead("config.ini", "Teclas", "VaraTecla", "1")
-    CONFIG.isca_tecla := IniRead("config.ini", "Teclas", "IscaTecla", "4")
-    CONFIG.canil_tecla := IniRead("config.ini", "Teclas", "CanilTecla", "2")
+    CONFIG.vara_tecla := LerIni("Teclas", "VaraTecla", "1")
+    CONFIG.isca_tecla := LerIni("Teclas", "IscaTecla", "4")
+    CONFIG.canil_tecla := LerIni("Teclas", "CanilTecla", "2")
     
     ; Tempos (ms)
-    CONFIG.delay_clique := Integer(IniRead("config.ini", "Tempos", "DelayClique", "15"))
-    CONFIG.delay_isca_vara := Integer(IniRead("config.ini", "Tempos", "DelayIscaVara", "700"))
-    CONFIG.delay_canil := Integer(IniRead("config.ini", "Tempos", "DelayCanil", "100"))
+    CONFIG.delay_clique := Integer(LerIni("Tempos", "DelayClique", "15"))
+    CONFIG.delay_isca_vara := Integer(LerIni("Tempos", "DelayIscaVara", "700"))
+    CONFIG.delay_canil := Integer(LerIni("Tempos", "DelayCanil", "100"))
     
     ; Intervalos (segundos)
-    CONFIG.intervalo_comer := Integer(IniRead("config.ini", "Intervalo de Acoes", "IntervaloComer", "300"))
-    CONFIG.intervalo_beber := Integer(IniRead("config.ini", "Intervalo de Acoes", "IntervaloBeberAgua", "180"))
+    CONFIG.intervalo_comer := Integer(LerIni("Intervalo de Acoes", "IntervaloComer", "300"))
+    CONFIG.intervalo_beber := Integer(LerIni("Intervalo de Acoes", "IntervaloBeberAgua", "180"))
     
     ; Failsafe
-    CONFIG.failsafe_ciclos := Integer(IniRead("config.ini", "Failsafe", "CiclosFailsafe", "30"))
+    CONFIG.failsafe_ciclos := Integer(LerIni("Failsafe", "CiclosFailsafe", "30"))
     
     ; Loot
-    CONFIG.loot_reliquias := Integer(IniRead("config.ini", "Loot", "LootReliquias", "1"))
-    CONFIG.loot_armas := Integer(IniRead("config.ini", "Loot", "LootArmas", "0"))
-    CONFIG.loot_bluesteel := Integer(IniRead("config.ini", "Loot", "LootBlueSteel", "1"))
+    CONFIG.loot_reliquias := Integer(LerIni("Loot", "LootReliquias", "1"))
+    CONFIG.loot_armas := Integer(LerIni("Loot", "LootArmas", "0"))
+    CONFIG.loot_bluesteel := Integer(LerIni("Loot", "LootBlueSteel", "1"))
     
     ; Posições padrão (1920x1080)
     POSICOES.A := {x: 880, y: 580}
@@ -71,86 +77,80 @@ CarregarConfiguracao() {
 }
 
 CriarInterface() {
-    global UI_Handle, CONFIG
+    global UI_Handle, CONFIG, STATUS
     
-    myGui := Gui()
+    myGui := Gui("-MaximizeBox -MinimizeBox", "Deepwoken Fishing Macro")
     myGui.Opt("+AlwaysOnTop")
-    myGui.BackColor := "0D1117"
+    myGui.BackColor := "1A1B26" ; Fundo escuro moderno
+    myGui.SetFont("s10 cC0CAF5", "Segoe UI") ; Fonte limpa e legível
     
     ; ===== CABEÇALHO =====
-    myGui.Add("Text", "c00D4FF h30 w600 Center", "⚙️ DEEPWOKEN FISHING MACRO v2.0")
-    myGui.Add("Text", "c6E40AA h2 w600 y+0", "")
+    myGui.SetFont("s16 Bold c7AA2F7") 
+    myGui.Add("Text", "x0 y15 w780 Center", "⚙️ DEEPWOKEN FISHING MACRO v2.0")
+    myGui.SetFont("s10 Norm cC0CAF5")
     
-    ; ===== SEÇÃO: TECLAS =====
-    myGui.Add("Text", "c00D4FF h25 w600 y+10", "🎮 CONFIGURAÇÃO DE TECLAS")
+    ; ================= COLUNA 1 (Esquerda) =================
+    myGui.SetFont("Bold cBB9AF7")
+    myGui.Add("Text", "x25 y65 w220", "🎮 CONFIGURAÇÃO DE TECLAS")
+    myGui.SetFont("Norm cC0CAF5")
+    myGui.Add("Text", "x25 y95 w120", "Vara (equipar):")
+    myGui.Add("Edit", "x145 y90 w60 Center v_vara Background24283B cWhite", CONFIG.vara_tecla)
+    myGui.Add("Text", "x25 y130 w120", "Isca (Chum):")
+    myGui.Add("Edit", "x145 y125 w60 Center v_isca Background24283B cWhite", CONFIG.isca_tecla)
+    myGui.Add("Text", "x25 y165 w120", "Cantil (Água):")
+    myGui.Add("Edit", "x145 y160 w60 Center v_canil Background24283B cWhite", CONFIG.canil_tecla)
     
-    myGui.Add("Text", "x10 y+5 w180 h20", "Tecla Vara (equipar):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_vara", CONFIG.vara_tecla)
+    myGui.SetFont("Bold cBB9AF7")
+    myGui.Add("Text", "x25 y215 w220", "⏱️ TEMPOS E DELAYS")
+    myGui.SetFont("Norm cC0CAF5")
+    myGui.Add("Text", "x25 y245 w120", "Cliques (ms):")
+    myGui.Add("Edit", "x145 y240 w60 Center v_delay_clique Background24283B cWhite", CONFIG.delay_clique)
+    myGui.Add("Text", "x25 y280 w120", "Isca → Vara (ms):")
+    myGui.Add("Edit", "x145 y275 w60 Center v_delay_isca_vara Background24283B cWhite", CONFIG.delay_isca_vara)
+    myGui.Add("Text", "x25 y315 w120", "Cantil (ms):")
+    myGui.Add("Edit", "x145 y310 w60 Center v_delay_canil Background24283B cWhite", CONFIG.delay_canil)
     
-    myGui.Add("Text", "x10 y+5 w180 h20", "Tecla Isca (Chum):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_isca", CONFIG.isca_tecla)
+    ; ================= COLUNA 2 (Centro) =================
+    myGui.SetFont("Bold c9ECE6A")
+    myGui.Add("Text", "x280 y65 w220", "🔄 INTERVALOS (segundos)")
+    myGui.SetFont("Norm cC0CAF5")
+    myGui.Add("Text", "x280 y95 w120", "Comer:")
+    myGui.Add("Edit", "x395 y90 w60 Center v_intervalo_comer Background24283B cWhite", CONFIG.intervalo_comer)
+    myGui.Add("Text", "x280 y130 w120", "Beber Água:")
+    myGui.Add("Edit", "x395 y125 w60 Center v_intervalo_beber Background24283B cWhite", CONFIG.intervalo_beber)
+    myGui.Add("Text", "x280 y165 w120", "Failsafe (Ciclos):")
+    myGui.Add("Edit", "x395 y160 w60 Center v_failsafe Background24283B cWhite", CONFIG.failsafe_ciclos)
     
-    myGui.Add("Text", "x10 y+5 w180 h20", "Tecla Cantil (Água):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_canil", CONFIG.canil_tecla)
+    myGui.SetFont("Bold c9ECE6A")
+    myGui.Add("Text", "x280 y215 w220", "🤖 FUNÇÕES AUTOMÁTICAS")
+    myGui.SetFont("Norm cC0CAF5")
+    myGui.Add("Checkbox", "x280 y245 w220 Checked v_auto_beber", "Auto-Beber Água")
+    myGui.Add("Checkbox", "x280 y275 w220 Checked v_auto_defesa", "Auto-Defesa em Combate")
+    myGui.Add("Checkbox", "x280 y305 w110 Checked v_loot_reliquias", "Loot Relíquias")
+    myGui.Add("Checkbox", "x395 y305 w110 Checked v_loot_bluesteel", "Loot BlueSteel")
+    myGui.Add("Checkbox", "x280 y335 w220 v_loot_armas", "Loot Armas")
     
-    ; ===== SEÇÃO: TEMPOS E DELAYS =====
-    myGui.Add("Text", "c00D4FF h25 w600 y+15", "⏱️ TEMPOS E DELAYS")
+    ; ================= COLUNA 3 (Direita) =================
+    myGui.SetFont("Bold cE0AF68")
+    myGui.Add("Text", "x530 y65 w230", "📍 POSIÇÕES DE PESCA")
+    myGui.SetFont("s9 c565F89")
+    myGui.Add("Text", "x530 y90 w230", "Z = Esquerda | X = Centro | C = Direita")
+    myGui.SetFont("s10 cC0CAF5")
+    myGui.Add("Button", "x530 y115 w220 h30 v_btn_coords", "🔍 Ver Coordenadas (K)")
     
-    myGui.Add("Text", "x10 y+5 w180 h20", "Delay Cliques (ms):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_delay_clique", CONFIG.delay_clique)
-    myGui.Add("Text", "x260 y+0 w150 h20 c888888", "(⏱️ recomendado: 15)")
+    myGui.SetFont("Bold cE0AF68")
+    myGui.Add("Text", "x530 y180 w230", "🎮 CONTROLE DO MACRO")
+    myGui.SetFont("Norm cC0CAF5")
+    myGui.Add("Button", "x530 y210 w105 h45 cBlack v_btn_iniciar", "▶ INICIAR [")
+    myGui.Add("Button", "x645 y210 w105 h45 cBlack v_btn_parar", "⏹ PARAR ]")
+    myGui.Add("Button", "x530 y265 w220 h35 cBlack v_btn_sair", "❌ FECHAR E SAIR")
     
-    myGui.Add("Text", "x10 y+5 w180 h20", "Delay Isca → Vara (ms):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_delay_isca_vara", CONFIG.delay_isca_vara)
-    myGui.Add("Text", "x260 y+0 w200 h20 c888888", "(⏱️ recomendado: 700 - CRÍTICO!)")
+    ; ===== RODAPÉ DE STATUS =====
+    myGui.Add("Text", "x25 y385 w730 h2 0x10") ; Linha divisória horizontal
+    myGui.SetFont("Bold s12 c9ECE6A")
+    myGui.Add("Text", "x25 y400 w730 Center v_status", STATUS.status_texto)
     
-    myGui.Add("Text", "x10 y+5 w180 h20", "Delay Cantil (ms):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_delay_canil", CONFIG.delay_canil)
-    myGui.Add("Text", "x260 y+0 w150 h20 c888888", "(padrão: 100)")
-    
-    ; ===== SEÇÃO: INTERVALOS DE AÇÕES =====
-    myGui.Add("Text", "c00D4FF h25 w600 y+15", "🔄 INTERVALOS DE AÇÕES (segundos)")
-    
-    myGui.Add("Text", "x10 y+5 w180 h20", "Intervalo Comer (s):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_intervalo_comer", CONFIG.intervalo_comer)
-    myGui.Add("Text", "x260 y+0 w180 h20 c888888", "(⏱️ recomendado: 300)")
-    
-    myGui.Add("Text", "x10 y+5 w180 h20", "Intervalo Beber (s):")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_intervalo_beber", CONFIG.intervalo_beber)
-    myGui.Add("Text", "x260 y+0 w180 h20 c888888", "(⏱️ recomendado: 180)")
-    
-    myGui.Add("Text", "x10 y+5 w180 h20", "Failsafe Ciclos:")
-    myGui.Add("Edit", "x200 y+0 w50 h20 v_failsafe", CONFIG.failsafe_ciclos)
-    myGui.Add("Text", "x260 y+0 w150 h20 c888888", "(padrão: 30)")
-    
-    ; ===== SEÇÃO: FUNÇÕES AUTOMÁTICAS =====
-    myGui.Add("Text", "c00D4FF h25 w600 y+15", "🤖 FUNÇÕES AUTOMÁTICAS")
-    
-    myGui.Add("Checkbox", "x10 y+5 w300 Checked v_auto_beber", "✓ Auto-Beber Água")
-    myGui.Add("Checkbox", "x10 y+5 w300 Checked v_auto_defesa", "✓ Auto-Defesa em Combate")
-    myGui.Add("Checkbox", "x10 y+5 w300 Checked v_loot_reliquias", "✓ Auto-Loot Relíquias")
-    myGui.Add("Checkbox", "x10 y+5 w300 v_loot_armas", "✗ Auto-Loot Armas")
-    myGui.Add("Checkbox", "x10 y+5 w300 Checked v_loot_bluesteel", "✓ Auto-Loot BlueSteel")
-    
-    ; ===== SEÇÃO: POSIÇÕES =====
-    myGui.Add("Text", "c00D4FF h25 w600 y+15", "📍 CONFIGURAÇÃO DE POSIÇÕES")
-    
-    myGui.Add("Text", "x10 y+5 w200 h20", "Pressione Z/X/C para configurar:")
-    myGui.Add("Text", "x10 y+5 w600 h20 c888888", "Z = Esquerda (A) | X = Centro (S) | C = Direita (D)")
-    myGui.Add("Button", "x10 y+5 w80 h25 v_btn_coords", "Ver Coords (K)")
-    
-    ; ===== SEÇÃO: BOTÕES =====
-    myGui.Add("Button", "x10 y+15 w120 h35 c00D4FF v_btn_iniciar", "▶️  INICIAR [[]")
-    myGui.Add("Button", "x135 y+0 w120 h35 cFF6B00 v_btn_parar", "⏹️  PARAR []")
-    myGui.Add("Button", "x260 y+0 w100 h35 cCC0000 v_btn_sair", "❌  SAIR")
-    
-    ; ===== SEÇÃO: STATUS =====
-    myGui.Add("Text", "c6E40AA h2 w600 y+10", "")
-    myGui.Add("Text", "x10 y+5 w600 h30 c00FF00 v_status", STATUS.status_texto)
-    myGui.Add("Text", "x10 y+5 w600 h20 c888888", "Posições: A (Z) | S (X) | D (C) | Ver coords (K)")
-    
-    myGui.Show("w620 h750 +AlwaysOnTop", "Deepwoken Fishing Macro")
-    
+    myGui.Show("w780 h450")
     UI_Handle := myGui
 }
 
@@ -158,7 +158,7 @@ AtualizarStatus(texto) {
     global STATUS, UI_Handle
     STATUS.status_texto := texto
     if (UI_Handle) {
-        try UI_Handle["_status"].Value := texto
+        try UI_Handle["status"].Value := texto
     }
 }
 
@@ -320,5 +320,3 @@ PararMacro() {
     ToolTip("⏸️  Macro parado com sucesso", 960, 50)
     SetTimer(() => ToolTip(), 2000)
 }
-
-; ==================== FIM ====================
