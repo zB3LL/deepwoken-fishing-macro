@@ -1,0 +1,18 @@
+# Sistema operacional
+Thumbs.db
+.DS_Store
+
+# Arquivos de log
+*.log
+
+# Imagens (muito grandes)
+Images/
+
+# Backup
+*.bak
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
