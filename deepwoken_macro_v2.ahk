@@ -211,8 +211,10 @@ DetectarEReagir() {
     local failsafe := CONFIG.failsafe_ciclos
     local detectado := false
     
-    loop {
-        if (!STATUS.em_execucao) break
+    Loop {
+        if (!STATUS.em_execucao) {
+            break
+        }
         
         ; ZONA A (Esquerda)
         PixelSearch(&x, &y, POSICOES.A_zona.x1, POSICOES.A_zona.y1, POSICOES.A_zona.x2, POSICOES.A_zona.y2, 0xFFFFFF, 90)
@@ -300,9 +302,9 @@ ConfigurarPosicao(tipo) {
 MostrarCoordenadas() {
     global POSICOES
     
-    msg := "📍 COORDENADAS ATUAIS:\n\n"
-    msg .= "A (Esquerda): " POSICOES.A.x " x " POSICOES.A.y "\n"
-    msg .= "S (Centro):   " POSICOES.S.x " x " POSICOES.S.y "\n"
+    msg := "📍 COORDENADAS ATUAIS:`n`n"
+    msg .= "A (Esquerda): " POSICOES.A.x " x " POSICOES.A.y "`n"
+    msg .= "S (Centro):   " POSICOES.S.x " x " POSICOES.S.y "`n"
     msg .= "D (Direita):  " POSICOES.D.x " x " POSICOES.D.y
     
     ToolTip(msg, 100, 100)
