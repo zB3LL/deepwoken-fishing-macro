@@ -165,7 +165,9 @@ AtualizarStatus(texto) {
 IniciarPesca() {
     global CONFIG, POSICOES, STATUS
     
-    if (!STATUS.em_execucao) return
+    if (!STATUS.em_execucao) {
+        return
+    }
     
     AtualizarStatus("🎣 Preparando pesca...")
     
